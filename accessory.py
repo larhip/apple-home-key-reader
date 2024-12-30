@@ -124,18 +124,28 @@ class Lock(Accessory):
         self.service.update_hap_pairings(client_public_keys)
 
     def get_lock_current_state(self):
-        log.info("get_lock_current_state")
-        return self._lock_current_state
+        log.info("get_lock_current_state: always closed (1)")
+        return 1  # 1 = closed
+        #log.info("get_lock_current_state")
+        #return self._lock_current_state
 
     def get_lock_target_state(self):
-        log.info("get_lock_target_state")
-        return self._lock_target_state
+        log.info("get_lock_target_state: always closed (1)")
+        return 1  # 1 = geschlossen
+        #log.info("get_lock_target_state")
+        #return self._lock_target_state
 
     def set_lock_target_state(self, value):
         log.info(f"set_lock_target_state {value}")
-        self._lock_target_state = self._lock_current_state = value
-        self.lock_current_state.set_value(self._lock_current_state, should_notify=True)
-        return self._lock_target_state
+        if value == 0:  # Door should open, execute trigger
+            #self.activate_door_opener()
+            log.info("Reset status to locked (1), but send notification")
+            self.lock_target_state.set_value(1, should_notify=True)
+            self.lock_current_state.set_value(1, should_notify=True)
+        else:
+            log.info("Already closed. No action required.")
+
+        return 1  # target state is always locked (1)
 
     def get_lock_version(self):
         log.info("get_lock_version")
